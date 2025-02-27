@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- ================================================
+       (1) META & TITLE
+  ================================================= -->
+  <meta charset="UTF-8" />
+  <title>FormSaaS - Create Custom Google Forms Instantly</title>
+
+  <!-- ================================================
+       (2) FONTS & TAILWIND SETUP
+  ================================================= -->
+  <link
+    href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap"
+    rel="stylesheet"
+  />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    /*
+      Tailwind custom color config
+    */
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'brand-blue': '#4e9af1',
+            'brand-dark': '#576cbc',
+            'hero-blue': '#6573de'
+          }
+        }
+      }
+    }
+  </script>
+</head>
+
+<body class="bg-gray-100 text-gray-800 font-sans flex flex-col min-h-screen">
+  <!-- ================================================
+       (3) HEADER / NAVIGATION
+  ================================================= -->
+  <header class="bg-gradient-to-r from-brand-blue to-brand-dark text-white p-4 sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto flex justify-between items-center">
+      <!-- Brand Name / Logo -->
+      <div class="text-2xl font-bold">FormSaaS</div>
+
+      <!-- Navigation Links -->
+      <nav>
+        <ul class="flex gap-6">
+          <li><a href="#hero" class="hover:text-gray-300">Home</a></li>
+          <li><a href="#onboarding" class="hover:text-gray-300">Get Started</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ================================================
+       (4) HERO SECTION
+  ================================================= -->
+  <section
+    id="hero"
+    class="bg-gradient-to-br from-brand-blue to-hero-blue h-96 flex items-center justify-center text-center text-white p-8"
+  >
+    <div>
+      <h1 class="text-4xl md:text-5xl font-extrabold mb-4">
+        Create Custom Google Forms Instantly
+      </h1>
+      <p class="text-lg md:text-xl mb-6 max-w-xl mx-auto">
+        Customize your forms with professional themes, colors, and embed options — no code required.
+      </p>
+      <button
+        class="bg-blue-500 hover:bg-blue-600 px-6 py-3 rounded text-white text-lg"
+        onclick="document.getElementById('onboarding').scrollIntoView({ behavior: 'smooth' })"
+      >
+        Get Started
+      </button>
+    </div>
+  </section>
+
+  <!-- ================================================
+       (Optional) Example Embed Snippet for Testing
+  ================================================= -->
+  <!--
+    If you want to test the embed functionality quickly, 
+    you can keep or remove this snippet. 
+  -->
+  <div data-customform="74492125-ed39-40ce-af33-c9ade5e1b81c"></div>
+  <script async src="http://127.0.0.1:5001/embed.js"></script>
+
+  <!-- ================================================
+       (5) MAIN CONTENT: TWO-COLUMN LAYOUT
+  ================================================= -->
+  <section id="onboarding" class="flex-grow bg-white py-12">
+    <div class="max-w-7xl mx-auto px-4">
+      <div class="flex flex-col md:flex-row items-start md:items-center gap-8">
+
+        <!-- 5A. LEFT COLUMN: LIVE PREVIEW AREA -->
+        <div class="w-full md:w-1/2 flex justify-center">
+          <div
+            id="livePreview"
+            class="flex items-center justify-center w-full h-96 bg-gray-100 border border-gray-300 rounded-md"
+          >
+            <!-- Placeholder text (overridden by JS) -->
+            <span class="text-gray-500">[ Form Illustration Placeholder ]</span>
+          </div>
+        </div>
+
+        <!-- 5B. RIGHT COLUMN: Onboarding Form & Success Snippet -->
+        <div class="w-full md:w-1/2">
+          <!-- Onboarding Card -->
+          <div class="bg-white shadow rounded-lg p-6">
+            <form id="wizardForm" method="POST" action="/" class="space-y-4">
+              <h2 class="text-center text-2xl font-semibold mb-4">
+                Enter Your Link &amp; Choose a Template
+              </h2>
+
+              <!-- (A) Google Form Prefill Link Input -->
+              <div>
+                <label for="linkInput" class="block text-gray-700 font-medium mb-1">
+                  Google Form Prefill Link
+                </label>
+                <input
+                  type="url"
+                  id="linkInput"
+                  name="link"
+                  placeholder="https://docs.google.com/forms/d/e/.../viewform?entry.1234=Label"
+                  required
+                  class="w-full border border-gray-300 rounded px-3 py-2"
+                  value="{{ link_value | default('') }}"
+                />
+              </div>
+
+              <!-- (B) Template Selection Radios -->
+              <div>
+                <span class="block text-gray-700 font-medium mb-1">
+                  Choose a Template
+                </span>
+                <div class="flex flex-wrap gap-4">
+                  <label class="flex items-center">
+                    <input
+                      type="radio"
+                      name="template"
+                      value="modern"
+                      class="mr-1"
+                      {% if template_choice == "modern" %}checked{% endif %}
+                    />
+                    <span>Modern</span>
+                  </label>
+                  <label class="flex items-center">
+                    <input
+                      type="radio"
+                      name="template"
+                      value="dark"
+                      class="mr-1"
+                      {% if template_choice == "dark" %}checked{% endif %}
+                    />
+                    <span>Dark</span>
+                  </label>
+                  <label class="flex items-center">
+                    <input
+                      type="radio"
+                      name="template"
+                      value="gradient"
+                      class="mr-1"
+                      {% if template_choice == "gradient" %}checked{% endif %}
+                    />
+                    <span>Gradient</span>
+                  </label>
+                </div>
+              </div>
+
+              <!-- (Optional) Custom Preview Colors (Commented Out)
+                   If you want to allow users to pick custom BG/text color for the preview, 
+                   uncomment these inputs and handle them in your Flask code.
+              -->
+              <!--
+              <div>
+                <label for="preview_bg" class="block text-gray-700 font-medium mb-1">
+                  Preview Background Color
+                </label>
+                <input
+                  type="color"
+                  id="preview_bg"
+                  name="preview_bg"
+                  class="w-16 h-10 border-none"
+                  value="{{ preview_bg | default('#ffffff') }}"
+                />
+              </div>
+
+              <div>
+                <label for="preview_text" class="block text-gray-700 font-medium mb-1">
+                  Preview Text Color
+                </label>
+                <input
+                  type="color"
+                  id="preview_text"
+                  name="preview_text"
+                  class="w-16 h-10 border-none"
+                  value="{{ preview_text | default('#333333') }}"
+                />
+              </div>
+              -->
+
+              <!-- (C) Live Review Box (JS-updated) -->
+              <div
+                id="reviewBox"
+                class="bg-gray-100 border-l-4 border-blue-500 rounded p-4 text-sm min-h-[60px] whitespace-pre-wrap break-words"
+              >
+                <!-- Filled dynamically by JS -->
+              </div>
+
+              <!-- (D) Generate Button -->
+              <button
+                type="submit"
+                id="generateBtn"
+                class="w-full bg-blue-300 text-gray-700 px-4 py-2 rounded disabled:opacity-50"
+                disabled
+              >
+                Generate Custom Form
+              </button>
+            </form>
+          </div>
+
+          <!-- (E) Success Snippet (Only if "public_url" is set by Flask) -->
+          {% if public_url %}
+            <div class="mt-8 p-4 border-t border-gray-300">
+              <h4 class="text-center text-lg font-medium mb-2">Embed This Form</h4>
+              <p class="text-center text-sm mb-4">
+                Copy and paste the code below into your website:
+              </p>
+              <div class="bg-gray-50 border border-gray-200 rounded p-4 text-sm font-mono">
+                <span id="embedCode">
+                  &lt;div data-customform="{{ form_id }}"&gt;&lt;/div&gt;<br />
+                  &lt;script async src="{{ url_for('embed_script', _external=True) }}"&gt;&lt;/script&gt;
+                </span>
+                <button
+                  onclick="copyEmbedCode()"
+                  class="mt-2 px-3 py-1 bg-gray-300 text-gray-700 rounded inline-flex items-center"
+                >
+                  <!-- Clipboard Icon -->
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="h-5 w-5 mr-1"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                    />
+                  </svg>
+                  Copy Code
+                </button>
+                <span id="copyFeedback" class="text-green-600 text-sm hidden">
+                  Copied!
+                </span>
+              </div>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================================
+       (6) FOOTER
+  ================================================= -->
+  <footer class="bg-gray-200 text-center py-4 text-sm text-gray-600">
+    &copy; 2025 FormSaaS. All rights reserved.
+  </footer>
+
+  <!-- ================================================
+       (7) ONBOARDING LOGIC (JS)
+       - Live Preview & Button State
+  ================================================= -->
+  <script>
+    // (7A) References to DOM elements
+    const linkInput      = document.getElementById("linkInput");
+    const templateRadios = document.querySelectorAll('input[name="template"]');
+    const reviewBox      = document.getElementById("reviewBox");
+    const generateBtn    = document.getElementById("generateBtn");
+
+    // The template_choice passed from Flask (default "modern")
+    let chosenTemplate = "{{ template_choice | default('modern') }}";
+
+    // (7B) Update the review box with link + chosen template
+    function updateReviewBox() {
+      const linkValue = linkInput.value.trim() || "[No Link]";
+      reviewBox.textContent =
+        "Google Form Link: " + linkValue + "\nChosen Template: " + chosenTemplate;
+    }
+
+    // (7C) Enable/disable the "Generate" button based on link input
+    function updateGenerateBtnState() {
+      const linkFilled = linkInput.value.trim().length > 0;
+      if (linkFilled) {
+        generateBtn.disabled = false;
+        generateBtn.classList.add("enabled");
+      } else {
+        generateBtn.disabled = true;
+        generateBtn.classList.remove("enabled");
+      }
+    }
+
+    // (7D) Update the live preview container based on the selected template
+    function updateLivePreview() {
+      const previewContainer = document.getElementById("livePreview");
+      if (!previewContainer) return;
+
+      let previewHTML = "";
+
+      // Dark Theme
+      if (chosenTemplate === "dark") {
+        previewContainer.className =
+          "flex items-center justify-center w-full h-64 bg-gray-900 border border-gray-300 rounded-md p-4";
+        previewHTML = `
+          <div class="max-w-md w-full p-4 bg-[#1a1a1a] border border-[#444] rounded">
+            <form class="space-y-4">
+              <div>
+                <label class="block mb-1 text-[#ccc] font-semibold">Name:</label>
+                <input
+                  type="text"
+                  class="w-full border border-[#444] rounded px-3 py-2 bg-[#2b2b2b] text-white"
+                  placeholder="Your Name"
+                />
+              </div>
+              <div>
+                <label class="block mb-1 text-[#ccc] font-semibold">Email:</label>
+                <input
+                  type="email"
+                  class="w-full border border-[#444] rounded px-3 py-2 bg-[#2b2b2b] text-white"
+                  placeholder="Your Email"
+                />
+              </div>
+              <button
+                type="button"
+                class="w-full bg-[#4e9af1] text-white py-2 rounded font-semibold"
+              >
+                Submit
+              </button>
+            </form>
+          </div>
+        `;
+      }
+      // Gradient Theme
+      else if (chosenTemplate === "gradient") {
+        previewContainer.className =
+          "flex items-center justify-center w-full h-64 bg-gradient-to-r from-purple-500 to-pink-500 border border-gray-300 rounded-md p-4";
+        previewHTML = `
+          <div class="max-w-md w-full p-4 bg-white/85 border border-gray-300 rounded">
+            <form class="space-y-4">
+              <div>
+                <label class="block mb-1 text-[#333] font-semibold">Name:</label>
+                <input
+                  type="text"
+                  class="w-full border border-gray-300 rounded px-3 py-2 bg-white text-[#333]"
+                  placeholder="Your Name"
+                />
+              </div>
+              <div>
+                <label class="block mb-1 text-[#333] font-semibold">Email:</label>
+                <input
+                  type="email"
+                  class="w-full border border-gray-300 rounded px-3 py-2 bg-white text-[#333]"
+                  placeholder="Your Email"
+                />
+              </div>
+              <button
+                type="button"
+                class="w-full bg-[#ff7e5f] text-white py-2 rounded font-semibold"
+              >
+                Submit
+              </button>
+            </form>
+          </div>
+        `;
+      }
+      // Modern Theme (Default)
+      else {
+        previewContainer.className =
+          "flex items-center justify-center w-full h-64 bg-white border border-gray-300 rounded-md p-4";
+        previewHTML = `
+          <div class="max-w-md w-full p-4 bg-white border border-gray-300 rounded">
+            <form class="space-y-4">
+              <div>
+                <label class="block mb-1 text-[#333] font-semibold">Name:</label>
+                <input
+                  type="text"
+                  class="w-full border border-gray-300 rounded px-3 py-2 bg-white text-[#333]"
+                  placeholder="Your Name"
+                />
+              </div>
+              <div>
+                <label class="block mb-1 text-[#333] font-semibold">Email:</label>
+                <input
+                  type="email"
+                  class="w-full border border-gray-300 rounded px-3 py-2 bg-white text-[#333]"
+                  placeholder="Your Email"
+                />
+              </div>
+              <button
+                type="button"
+                class="w-full bg-[#4e9af1] text-white py-2 rounded font-semibold"
+              >
+                Submit
+              </button>
+            </form>
+          </div>
+        `;
+      }
+
+      // Insert final HTML snippet into the preview container
+      previewContainer.innerHTML = previewHTML;
+    }
+
+    // (7E) Event listeners for link changes & template changes
+    linkInput.addEventListener("input", () => {
+      updateReviewBox();
+      updateGenerateBtnState();
+      updateLivePreview();
+    });
+    templateRadios.forEach((radio) => {
+      radio.addEventListener("change", () => {
+        chosenTemplate = radio.value;
+        updateReviewBox();
+        updateLivePreview();
+      });
+    });
+
+    // (7F) Initialize on page load
+    updateReviewBox();
+    updateGenerateBtnState();
+    updateLivePreview();
+
+    // (7G) Copy embed code function
+    function copyEmbedCode() {
+      const embedCode = document.getElementById("embedCode").innerText;
+      navigator.clipboard.writeText(embedCode).then(() => {
+        const feedback = document.getElementById("copyFeedback");
+        feedback.classList.remove("hidden");
+        setTimeout(() => {
+          feedback.classList.add("hidden");
+        }, 2000);
+      });
+    }
+  </script>
+
+  <!-- ================================================
+       (8) LOAD LIVE PREVIEW (IF FORM GENERATED)
+  ================================================= -->
+  {% if public_url and form_id %}
+  <script>
+    fetch("{{ url_for('embed_form', form_id=form_id, _external=True) }}")
+      .then((response) => response.text())
+      .then((html) => {
+        const previewContainer = document.getElementById("livePreview");
+        previewContainer.innerHTML = html;
+      })
+      .catch((error) => {
+        console.error("Error loading preview:", error);
+      });
+  </script>
+  {% endif %}
+
+  <!-- ================================================
+       (9) INTERCEPT LIVE PREVIEW FORM SUBMISSION (AJAX)
+  ================================================= -->
+  <script>
+    // (9A) Create a popup for showing success/error messages
+    const popupHTML = `
+      <div
+        id="submissionPopup"
+        class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden"
+      >
+        <div class="bg-white p-6 rounded shadow-lg text-center">
+          <p id="submissionMessage" class="mb-4"></p>
+          <button
+            onclick="closePopup()"
+            class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    `;
+    document.body.insertAdjacentHTML("beforeend", popupHTML);
+
+    // (9B) Show/hide popup functions
+    function showPopup(message, isSuccess) {
+      const popup = document.getElementById("submissionPopup");
+      const submissionMessage = document.getElementById("submissionMessage");
+      submissionMessage.textContent = message;
+      submissionMessage.className = isSuccess
+        ? "mb-4 text-green-700"
+        : "mb-4 text-red-700";
+      popup.classList.remove("hidden");
+    }
+
+    function closePopup() {
+      const popup = document.getElementById("submissionPopup");
+      popup.classList.add("hidden");
+    }
+
+    // (9C) Intercept form submission from the live preview (if present)
+    const previewContainer = document.getElementById("livePreview");
+    previewContainer.addEventListener("submit", function (event) {
+      if (event.target && event.target.id === "ajaxForm") {
+        event.preventDefault();
+        const form = event.target;
+        const formData = new FormData(form);
+        const actionUrl = form.getAttribute("action");
+
+        fetch(actionUrl, {
+          method: "POST",
+          body: formData,
+          headers: {
+            "X-Requested-With": "XMLHttpRequest"
+          }
+        })
+          .then((res) => res.text())
+          .then((responseText) => {
+            if (responseText.startsWith("SUCCESS:")) {
+              showPopup(responseText.replace("SUCCESS:", "").trim(), true);
+            } else if (responseText.startsWith("ERROR:")) {
+              showPopup(responseText.replace("ERROR:", "").trim(), false);
+            } else {
+              showPopup("Unknown response: " + responseText, false);
+            }
+          })
+          .catch((err) => {
+            showPopup("Failed to submit. Please try again.", false);
+          });
+      }
+    });
+  </script>
+  <!-- ================================================
+       END OF SCRIPT SECTIONS
+  ================================================= -->
+</body>
+</html>
